@@ -20,8 +20,8 @@ def say(s):
     rate = engine.getProperty('rate')
     engine.setProperty('rate', rate-50)
     volume = engine.getProperty('volume')
-    engine.setProperty('volume', volume-0.80)                                                                              
-    engine.setProperty('voice', 'english-us')                                                                                        
+    engine.setProperty('volume', volume-0.80)
+    engine.setProperty('voice', 'english-us')
     engine.say(s)
     a = engine.runAndWait() #blocks 
 
@@ -32,16 +32,11 @@ def antonym(word):
         return False
 
 
-# obtain audio from the microphone
-r = sr.Recognizer()
-
-
-# recognize speech using Wit.ai
 Config = ConfigParser.ConfigParser()
 Config.read('./argubot.ini')
-WIT_AI_KEY = Config.get('api keys','wit_ai_key') # Wit.ai keys are 32-character uppercase alphanumeric strings\
+WIT_AI_KEY = Config.get('api keys','wit_ai_key') 
 
-print WIT_AI_KEY
+r = sr.Recognizer()
 while True: 
     with sr.Microphone() as source:
         print("Say something!")
