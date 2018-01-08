@@ -1,2 +1,23 @@
 [api keys]
 WIT_AI_KEY : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+[pyttsx]
+PYTTSX_RATE : 150
+PYTTSX_VOLUME : 0.2
+PYTTSX_VOICE : english-us
+
+[antonyms]
+yes : no
+no : yes
+left : right
+right : left
+up : down
+down : up
+black : white
+white : black
+in : out
+out : in
+dark : light
+light : dark
+good : bad
+bad : good

@@ -3,32 +3,26 @@
 import speech_recognition as sr
 import pyttsx
 import ConfigParser
+import sys
 
 
-antonyms = {
-    "yes" : "no",
-    "no" : "yes",
-    "left" : "right",
-    "right" : "left",
-    "up" : "down",
-    "down" : "up",
-    'black' : 'white',
-    'white' : 'black',
-    'in' : 'out',
-    'out' : 'in',
-    'dark' : 'light',
-    'light' : 'dark',
-    'good' : 'bad'
-}
+Config = ConfigParser.ConfigParser()
+Config.read('./disagreebot.ini')
+WIT_AI_KEY = Config.get('api keys','WIT_AI_KEY')
+PYTTSX_RATE = Config.get('pyttsx','PYTTSX_RATE')
+PYTTSX_VOLUME = Config.get('pyttsx','PYTTSX_VOLUME')
+PYTTSX_VOICE = Config.get('pyttsx','PYTTSX_VOICE') 
+antonyms = dict(Config.items('antonyms'))
+keyword_entries = []
+for key in antonyms:
+    keyword_entries.append((key, 1.0))
 
 
 def say(s):
     engine = pyttsx.init()
-    rate = engine.getProperty('rate')
-    engine.setProperty('rate', rate-50)
-    volume = engine.getProperty('volume')
-    engine.setProperty('volume', volume-0.80)
-    engine.setProperty('voice', 'english-us')
+    engine.setProperty('rate', PYTTSX_RATE)
+    engine.setProperty('volume', PYTTSX_VOLUME)
+    engine.setProperty('voice', PYTTSX_VOICE)
     engine.say(s)
     a = engine.runAndWait()
 
@@ -38,31 +32,33 @@ def antonym(word):
     else:
         return False
 
-
-Config = ConfigParser.ConfigParser()
-Config.read('./disagreebot.ini')
-WIT_AI_KEY = Config.get('api keys','wit_ai_key') 
-
-r = sr.Recognizer()
-while True: 
+def main(argv):
+    r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Say something!")
-        audio = r.listen(source)
-        print "retrieving from Wit.ai...."
-    try:
-        w = r.recognize_wit(audio, key=WIT_AI_KEY)
-        words = w.split(' ')
-        for word in words:
-            if word == 'stop':
-                print "bye"
-                break;
-            print("Wit.ai thinks you said '" + word + "'")
-            a = antonym(word)
-            if a:
-                print "If you say '" + word + "' I say '" + a + "'"
-                say(a)
-        
-    except sr.UnknownValueError:
-        print("Wit.ai could not understand audio")
-    except sr.RequestError as e:
-        print("Could not request results from Wit.ai service; {0}".format(e))
+        print ("adjusting for ambient noise...")
+        r.adjust_for_ambient_noise(source)
+    while True: 
+        with sr.Microphone() as source:
+            print("Say something!")
+            audio = r.listen(source,)
+            print "retrieving from Wit.ai...."
+        try:
+            w = r.recognize_wit(audio, key=WIT_AI_KEY)
+            words = w.split(' ')
+            for word in words:
+                if word == 'stop':
+                    print "bye"
+                    break;
+                print("Wit.ai thinks you said '" + word + "'")
+                ant = antonym(word)
+                if ant:
+                    print "If you say '" + word + "' I say '" + ant + "'"
+                    say(ant)
+        except sr.UnknownValueError:
+            print("Wit.ai could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Wit.ai service; {0}".format(e))
+    exit()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
