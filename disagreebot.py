@@ -11,7 +11,14 @@ antonyms = {
     "left" : "right",
     "right" : "left",
     "up" : "down",
-    "down" : "up"
+    "down" : "up",
+    'black' : 'white',
+    'white' : 'black',
+    'in' : 'out',
+    'out' : 'in',
+    'dark' : 'light',
+    'light' : 'dark',
+    'good' : 'bad'
 }
 
 
@@ -23,7 +30,7 @@ def say(s):
     engine.setProperty('volume', volume-0.80)
     engine.setProperty('voice', 'english-us')
     engine.say(s)
-    a = engine.runAndWait() #blocks 
+    a = engine.runAndWait()
 
 def antonym(word):
     if antonyms.has_key(word):
@@ -33,7 +40,7 @@ def antonym(word):
 
 
 Config = ConfigParser.ConfigParser()
-Config.read('./argubot.ini')
+Config.read('./disagreebot.ini')
 WIT_AI_KEY = Config.get('api keys','wit_ai_key') 
 
 r = sr.Recognizer()
