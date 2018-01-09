@@ -20,8 +20,6 @@ class Argubot:
             self.keyword_entries.append((key, 1.0))
 
     def disagree(self, argv):
-        print argv
-        exit()
         r = sr.Recognizer()
         with sr.Microphone() as source:
             print ("adjusting for ambient noise...")
