@@ -7,7 +7,7 @@ import sys
 
 
 Config = ConfigParser.ConfigParser()
-Config.read('./disagreebot.ini')
+Config.read('./argubot.ini')
 WIT_AI_KEY = Config.get('api keys','WIT_AI_KEY')
 PYTTSX_RATE = Config.get('pyttsx','PYTTSX_RATE')
 PYTTSX_VOLUME = Config.get('pyttsx','PYTTSX_VOLUME')
