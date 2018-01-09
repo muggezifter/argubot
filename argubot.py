@@ -34,18 +34,18 @@ class Argubot:
                 words = w.split(' ')
                 for word in words:
                     if word == 'stop':
-                        print "bye"
-                        break;
+                        self.say("argubot wins another argument")
+                        exit()
                     print("Wit.ai thinks you said '" + word + "'")
-                    ant = antonym(word)
+                    ant = self.antonym(word)
                     if ant:
                         print "If you say '" + word + "' I say '" + ant + "'"
-                        say(ant)
+                        self.say(ant)
             except sr.UnknownValueError:
                 print("Wit.ai could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results from Wit.ai service; {0}".format(e))
-        exit()
+
 
     def say(self, word):
         engine = pyttsx.init()
@@ -53,7 +53,7 @@ class Argubot:
         engine.setProperty('volume', self.PYTTSX_VOLUME)
         engine.setProperty('voice', self.PYTTSX_VOICE)
         engine.say(word)
-        _ = engine.runAndWait()
+        engine.runAndWait()
 
     def antonym(self, word):
         if self.antonyms.has_key(word):
