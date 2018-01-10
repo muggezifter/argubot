@@ -1,1 +1,4 @@
 *.ini
+*.pyc
+models/snowboy/*
+!models/snowboy/.gitkeep

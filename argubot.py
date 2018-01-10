@@ -6,7 +6,7 @@ import ConfigParser
 import sys
 
 
-class Argubot:  
+class Argubot(object):  
     def __init__(self):
         Config = ConfigParser.ConfigParser()
         Config.read('./argubot.ini')
@@ -37,17 +37,17 @@ class Argubot:
                         self.say("argubot wins another argument")
                         exit()
                     print("Wit.ai thinks you said '" + word + "'")
-                    ant = self.antonym(word)
+                    ant = self.__antonym(word)
                     if ant:
                         print "If you say '" + word + "' I say '" + ant + "'"
-                        self.say(ant)
+                        self.__say(ant)
             except sr.UnknownValueError:
                 print("Wit.ai could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results from Wit.ai service; {0}".format(e))
 
 
-    def say(self, word):
+    def __say(self, word):
         engine = pyttsx.init()
         engine.setProperty('rate', self.PYTTSX_RATE)
         engine.setProperty('volume', self.PYTTSX_VOLUME)
@@ -55,7 +55,7 @@ class Argubot:
         engine.say(word)
         engine.runAndWait()
 
-    def antonym(self, word):
+    def __antonym(self, word):
         if self.antonyms.has_key(word):
             return self.antonyms[word]
         else:
