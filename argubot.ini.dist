@@ -1,12 +1,16 @@
 [api keys]
 WIT_AI_KEY : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+[snowboy]
+model_path : /path/to/snowboy/models/
+
 [pyttsx]
 PYTTSX_RATE : 150
 PYTTSX_VOLUME : 0.2
-PYTTSX_VOICE : english-us
+PYTTSX_VOICE_EN : en-us
+PYTTSX_VOICE_NL : nl
 
-[antonyms]
+[antonyms en]
 yes : no
 no : yes
 left : right
@@ -21,3 +25,13 @@ dark : light
 light : dark
 good : bad
 bad : good
+
+[antonyms nl]
+ja : nee
+nee : ja
+links : rechts
+rechts : links
+wit : zwart
+zwart : wit
+goed : fout
+fout : goed

@@ -4,47 +4,24 @@ import speech_recognition as sr
 import pyttsx
 import ConfigParser
 import sys
+import argparse
 
 
 class Argubot(object):  
-    def __init__(self):
-        Config = ConfigParser.ConfigParser()
-        Config.read('./argubot.ini')
-        self.WIT_AI_KEY = Config.get('api keys','WIT_AI_KEY')
-        self.PYTTSX_RATE = Config.get('pyttsx','PYTTSX_RATE')
-        self.PYTTSX_VOLUME = Config.get('pyttsx','PYTTSX_VOLUME')
-        self.PYTTSX_VOICE = Config.get('pyttsx','PYTTSX_VOICE') 
-        self.antonyms = dict(Config.items('antonyms'))
-        self.keyword_entries = []
-        for key in self.antonyms:
-            self.keyword_entries.append((key, 1.0))
+    def __init__(self,lan="en"):
+        self.cp = ConfigParser.ConfigParser()
+        self.cp.read('./argubot.ini')
+        self.lan = lan
+        self.PYTTSX_RATE = self.cp.get('pyttsx','PYTTSX_RATE')
+        self.PYTTSX_VOLUME = self.cp.get('pyttsx','PYTTSX_VOLUME')
+        self.PYTTSX_VOICE = self.cp.get('pyttsx','PYTTSX_VOICE_'+self.lan ) 
+        self.antonyms = dict(self.cp.items('antonyms '+ self.lan))
+        #self.keyword_entries = []
+        # for key in self.antonyms:
+        #    self.keyword_entries.append((key, 1.0))
 
-    def disagree(self, argv):
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            print ("adjusting for ambient noise...")
-            r.adjust_for_ambient_noise(source)
-        while True: 
-            with sr.Microphone() as source:
-                print("Say something!")
-                audio = r.listen(source,)
-                print "retrieving from Wit.ai...."
-            try:
-                w = r.recognize_wit(audio, key=self.WIT_AI_KEY)
-                words = w.split(' ')
-                for word in words:
-                    if word == 'stop':
-                        self.say("argubot wins another argument")
-                        exit()
-                    print("Wit.ai thinks you said '" + word + "'")
-                    ant = self.__antonym(word)
-                    if ant:
-                        print "If you say '" + word + "' I say '" + ant + "'"
-                        self.__say(ant)
-            except sr.UnknownValueError:
-                print("Wit.ai could not understand audio")
-            except sr.RequestError as e:
-                print("Could not request results from Wit.ai service; {0}".format(e))
+    def disagree(self):
+        print "method is implemented in subclass"
 
 
     def __say(self, word):
@@ -63,5 +40,24 @@ class Argubot(object):
 
 
 if __name__ == "__main__":
-    argubot = Argubot()
-    argubot.disagree(sys.argv[1:])
+    from argubot_snowboy import ArgubotSnowboy
+    from argubot_wit import ArgubotWit
+    ap = argparse.ArgumentParser(description="Wit.ai-based argubot")
+    ap.add_argument("-l", "--lan", 
+        required=False, 
+        choices=["nl","en"],
+        default="nl", 
+        help="language (nl or en; defaults to en)")
+    ap.add_argument("-t", "--type", 
+        required=False, 
+        choices=["wit","snowboy"],
+        default="snowboy", 
+        help="type of backend (wit or snowboy; defaults to snowboy)")
+
+    args = vars(ap.parse_args())
+    if args["type"]=="wit":
+        argubot = ArgubotWit(lan=args["lan"])  
+    else:
+        argubot = ArgubotSnowboy(lan=args["lan"]) 
+    argubot.disagree()
+
