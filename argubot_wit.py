@@ -30,14 +30,15 @@ class ArgubotWit(Argubot):
                         self.say("argubot wins another argument")
                         exit()
                     print("Wit.ai thinks you said '" + word + "'")
-                    ant = self.__antonym(word)
+                    ant = self.antonym(word)
                     if ant:
                         print "If you say '" + word + "' I say '" + ant + "'"
-                        self.__say(ant)
+                        self.say(ant)
             except sr.UnknownValueError:
                 print("Wit.ai could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results from Wit.ai service; {0}".format(e))
+
 
 
 if __name__ == "__main__":

@@ -1,62 +1,51 @@
 #! /usr/bin/env python
-from argubot import Argubot
+import argubot 
 import argparse
 import os.path
-import pyttsx
+import os
 import snowboydecoder
 import sys
 import signal
 
 
-class ArgubotSnowboy(Argubot):
+class ArgubotSnowboy(argubot.Argubot):
     def __init__(self, lan="en"):
         super(ArgubotSnowboy,self).__init__(lan=lan)
         self.model_path = self.cp.get('snowboy','model_path')
         self.models = []
         self.callbacks = []
-        
-        self.callbacks.extend([lambda: self.__say("rechts")])
-        self.callbacks.extend([lambda: self.__say("links")])
-        self.callbacks.extend([lambda: self.__say("ja")])
-        self.callbacks.extend([lambda: self.__say("zwart")])
-        self.callbacks.extend([lambda: self.__say("wit")])
-        self.callbacks.extend([lambda: self.__say("goed")])
-        self.callbacks.extend([lambda: self.__say("nee")])
-
+        self.cnt = 0
         for key in self.antonyms:
-            self.models.append(self.model_path + key + ".pmdl")
-			#self.callbacks.extend([lambda x: self.__self.antonyms[key]])
-        print self.callbacks 
-        print self.PYTTSX_VOICE
+            if os.path.isfile(self.model_path + key + ".pmdl"):
+                self.models.append(self.model_path + key + ".pmdl") 
+                self.callbacks.append(lambda ant=self.antonyms[key]: self.say(ant))
+
     def disagree(self):
     	global signal
     	global interrupted 
     	interrupted = False
         signal.signal(signal.SIGINT, self.signal_handler)
+        self.create_detector()
 
+
+    def create_detector(self):
         sensitivity = [0.5]*len(self.models)
-        detector = snowboydecoder.HotwordDetector(self.models, sensitivity=sensitivity)
+        self.detector = snowboydecoder.HotwordDetector(self.models, sensitivity=sensitivity)
         print('Listening... Press Ctrl+C to exit')
 
-        # main loop
-        # make sure you have the same numbers of callbacks and models
-        detector.start(detected_callback=self.callbacks,
+        self.detector.start(detected_callback=self.callbacks,
                 interrupt_check=self.interrupt_callback,
-                sleep_time=0.03)
+                sleep_time=0.3)
 
-        detector.terminate()
-
-    def __say(self, word):
-        engine = pyttsx.init()
-        engine.setProperty('rate', self.PYTTSX_RATE)
-        engine.setProperty('volume', self.PYTTSX_VOLUME)
-        engine.setProperty('voice', self.PYTTSX_VOICE)
-        engine.say(word)
-        engine.runAndWait()
+    def say(self, word):
+         self.detector.terminate()
+         os.system("espeak -v" + self.PYTTSX_VOICE + "+f2 -s" + self.PYTTSX_RATE + " " + word )
+         self.create_detector()
 
     def signal_handler(self, signal, frame):
         global interrupted
         interrupted = True
+
     def interrupt_callback(self):
     	global interrupted
         return interrupted
@@ -67,7 +56,7 @@ if __name__ == "__main__":
         required=False, 
         choices=["nl","en"],
         default="nl", 
-        help="language (nl or en; defaults to en)")
+        help="language (nl or en; defaults to nl)")
     args = vars(ap.parse_args())
     arglan = args["lan"]
     argubot = ArgubotSnowboy(lan=arglan)

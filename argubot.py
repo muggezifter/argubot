@@ -24,7 +24,7 @@ class Argubot(object):
         print "method is implemented in subclass"
 
 
-    def __say(self, word):
+    def say(self, word):
         engine = pyttsx.init()
         engine.setProperty('rate', self.PYTTSX_RATE)
         engine.setProperty('volume', self.PYTTSX_VOLUME)
@@ -32,7 +32,7 @@ class Argubot(object):
         engine.say(word)
         engine.runAndWait()
 
-    def __antonym(self, word):
+    def antonym(self, word):
         if self.antonyms.has_key(word):
             return self.antonyms[word]
         else:
