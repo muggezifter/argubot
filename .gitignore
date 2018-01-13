@@ -2,3 +2,4 @@
 *.pyc
 models/snowboy/*
 !models/snowboy/.gitkeep
+**/node_modules/

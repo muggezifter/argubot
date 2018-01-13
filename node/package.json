@@ -1,0 +1,19 @@
+{
+  "name": "argubot",
+  "version": "0.0.1",
+  "description": "argubot disagrees",
+  "main": "argubot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gert Rietveld",
+  "license": "ISC",
+  "dependencies": {
+    "child-process": "^1.0.2",
+    "espeak": "0.0.3",
+    "nan": "^2.8.0",
+    "node-record-lpcm16": "^0.3.0",
+    "snowboy": "^1.2.0",
+    "wav": "^1.0.1"
+  }
+}
