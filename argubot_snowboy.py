@@ -6,7 +6,7 @@ import os
 import snowboydecoder
 import sys
 import signal
-
+import time
 
 class ArgubotSnowboy(argubot.Argubot):
     def __init__(self, lan="en"):
@@ -15,40 +15,39 @@ class ArgubotSnowboy(argubot.Argubot):
         self.models = []
         self.callbacks = []
         self.cnt = 0
+        self.interrupted = False
+        self.signal = signal
+        self.signal.signal(self.signal.SIGINT, self.signal_handler)
         for key in self.antonyms:
             if os.path.isfile(self.model_path + key + ".pmdl"):
                 self.models.append(self.model_path + key + ".pmdl") 
                 self.callbacks.append(lambda ant=self.antonyms[key]: self.say(ant))
 
     def disagree(self):
-    	global signal
-    	global interrupted 
-    	interrupted = False
-        signal.signal(signal.SIGINT, self.signal_handler)
-        self.create_detector()
-
-
-    def create_detector(self):
+        print("ARGUBOT v.0.2.1")
+        print("[python version, engine: snowboy]")
         sensitivity = [0.5]*len(self.models)
         self.detector = snowboydecoder.HotwordDetector(self.models, sensitivity=sensitivity)
-        print('Listening... Press Ctrl+C to exit')
-
+        print('listening... press ctrl+c to exit')
         self.detector.start(detected_callback=self.callbacks,
                 interrupt_check=self.interrupt_callback,
                 sleep_time=0.3)
+        self.detector.terminate()
 
     def say(self, word):
-         self.detector.terminate()
-         os.system("espeak -v" + self.PYTTSX_VOICE + "+f2 -s" + self.PYTTSX_RATE + " " + word )
-         self.create_detector()
+        if not self.speaking:
+            self.speaking = True
+            os.system("espeak -v" + self.PYTTSX_VOICE + "+m2 -s" + self.PYTTSX_RATE + " " + word )
+            time.sleep(2)
+            self.speaking = False
 
     def signal_handler(self, signal, frame):
-        global interrupted
-        interrupted = True
+        self.interrupted = True
 
     def interrupt_callback(self):
-    	global interrupted
-        return interrupted
+        if self.interrupted:
+            print(" ARGUBOT signing off")
+        return self.interrupted
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Snowboy-based argubot")

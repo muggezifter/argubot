@@ -16,6 +16,7 @@ class Argubot(object):
         self.PYTTSX_VOLUME = self.cp.get('pyttsx','PYTTSX_VOLUME')
         self.PYTTSX_VOICE = self.cp.get('pyttsx','PYTTSX_VOICE_'+self.lan ) 
         self.antonyms = dict(self.cp.items('antonyms '+ self.lan))
+        self.speaking = False
         #self.keyword_entries = []
         # for key in self.antonyms:
         #    self.keyword_entries.append((key, 1.0))

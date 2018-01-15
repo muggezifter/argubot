@@ -2,22 +2,37 @@
 
 
 
-console.log("argubot");
+console.log("ARGUBOT");
 
 const exec = require('child_process').exec;
 
-var stopListening = false;
+var argubot_is_speaking = false;
 
 const record = require('node-record-lpcm16');
 const { Models, Detector } = require("snowboy");
 
+const antonyms = {
+  ja : 'nee',
+  nee: 'ja',
+  goed : 'fout',
+  fout : 'goed',
+  links : 'rechts',
+  rechts : 'links',
+  zwart : 'wit',
+  wit : 'zwart'
+}
+
+
 const models = new Models();
 
-models.add({
-  file: './node_modules/snowboy/resources/snowboy.umdl',
-  sensitivity: '0.5',
-  hotwords : 'snowboy'
-});
+for (key in antonyms) {
+  models.add({
+    file: '../models/snowboy/'+ key +'.pmdl',
+    sensitivity: '0.5',
+    hotwords : key
+  });
+}
+
 
 const detector = new Detector({
   resource: "./node_modules/snowboy/resources/common.res",
@@ -25,14 +40,18 @@ const detector = new Detector({
   audioGain: 2.0
 });
 
+var cnt_silence = 0;
 detector.on('silence', function () {
-  console.log('silence');
+  if (++cnt_silence > 5) {
+    console.log('ARGUBOT luistert...');
+    cnt_silence = 0;
+  }
 });
 
 detector.on('sound', function (buffer) {
   // <buffer> contains the last chunk of the audio that triggers the "sound"
   // event. It could be written to a wav stream.
-  console.log('sound');
+  //console.log('sound');
 });
 
 detector.on('error', function () {
@@ -45,16 +64,18 @@ detector.on('hotword', function (index, hotword, buffer) {
   // together with the <buffer> in the "sound" event if you want to get audio
   // data after the hotword.
   
-  // console.log(buffer);
-
-
-  console.log('hotword', index, hotword);
-  if (! stopListening) {
-    stopListening = true;
-    exec('espeak -vnl+f3 "ach margrietje de rozen zullen bloeien, ook al zie je mij niet meer"', function callback(error, stdout, stderr){
-      console.log("finished");
-      stopListening = false;
+   console.log(buffer);
+  
+  if (! argubot_is_speaking) {
+    console.log('hotword detected', index, hotword);
+    argubot_is_speaking = true;
+    exec('espeak -vnl+m2 ' + antonyms[hotword] , function callback(error, stdout, stderr){
+      setTimeout(function(){ 
+        argubot_is_speaking = false; 
+        console.log("finished",hotword);
+      },250);
     });
+
   }
  
   
@@ -63,7 +84,8 @@ detector.on('hotword', function (index, hotword, buffer) {
 
 const mic = record.start({
   threshold: 0,
-  verbose: true
+  verbose: false
 });
 
 mic.pipe(detector);
+
