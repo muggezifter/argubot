@@ -7,14 +7,14 @@ const record = require('node-record-lpcm16');
 const { Models, Detector } = require("snowboy");
 
 const antonyms = {
-  ja : 'nee'
-  , nee: 'ja'
-  , goed : 'fout'
-  , fout : 'goed'
-  , links : 'rechts'
-  , rechts : 'links'
-  , zwart : 'wit'
-  , wit : 'zwart'
+  ja : 'nee',
+  nee: 'ja',
+  goed : 'fout',
+  fout : 'goed',
+  links : 'rechts',
+  rechts : 'links',
+  zwart : 'wit',
+  wit : 'zwart'
 }
 
 
@@ -25,28 +25,29 @@ const screen = blessed.screen({
 const cons = contrib.log({ 
   border: {
     type: 'line'
-  }
-  , label: 'CONSOLE'
-  , width: '80%'
-  , height: '15%'
-  , top: '70%'
-  , left: 'center'
+  },
+  label: 'CONSOLE',
+  width: '80%',
+  height: '15%',
+  top: '70%',
+  left: 'center'
 });
 
 const wave = contrib.line({ 
-  style:
-  { line: [255,255,0] 
-   , text: [0,255,0]
-   , baseline: [0,0,0]}
-   , border: {
+  label: 'AUDIO',
+  border: {
     type: 'line'
+  },
+  top: '10%',
+  width: '80%',
+  height: '60%',
+  left: 'center',
+  numYLabels: 5,
+  style:{ 
+     line: [255,255,0],
+     text: [0,255,0],
+     baseline: [0,0,0]
   }
-  , top: '10%'
-  , width: '80%'
-  , height: '60%'
-  , left: 'center'
-  , numYLabels: 5
-  , label: 'AUDIO'
 })
 
 const create_bt = function(message) { 
@@ -70,21 +71,29 @@ screen.append(wave);
 screen.append(cons);
 
 
+const arr_x = [...Array(100).keys()];
+const arr_y = arr_x.map(function(value, i){ return 127 + 127*Math.sin(value);});
+
+wave.setData([ {
+  x: arr_x,
+  y: arr_y
+}])
+
 
 const models = new Models();
 
 for (key in antonyms) {
   models.add({
-    file: '../models/snowboy/'+ key +'.pmdl'
-    , sensitivity: '0.5'
-    , hotwords : key
+    file: '../models/snowboy/'+ key +'.pmdl',
+    sensitivity: '0.5',
+    hotwords : key
   });
 }
 
 const detector = new Detector({
-  resource: "./node_modules/snowboy/resources/common.res"
-  , models: models
-  , audioGain: 2.0
+  resource: "./node_modules/snowboy/resources/common.res",
+  models: models,
+  audioGain: 2.0
 });
 
 var argubot_is_speaking = false;
@@ -99,13 +108,13 @@ detector.on('silence', function () {
 });
 
 detector.on('sound', function (buffer) {
-  const ratio  = Math.floor(buffer.length/500);
+  const ratio  = Math.floor(buffer.length/100);
   const arr = buffer.filter(function (value, index, ar) {
       return (index % ratio == 0);
   } );
 
   wave.setData([ {
-     x: arr.map(function(i,v){ return "t" + i}),
+     x: arr.map(function(v,i){ return i}),
      y: arr
   }])
 });
