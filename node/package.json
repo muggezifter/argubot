@@ -9,8 +9,9 @@
   "author": "Gert Rietveld",
   "license": "ISC",
   "dependencies": {
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.5",
     "child-process": "^1.0.2",
-    "espeak": "0.0.3",
     "nan": "^2.8.0",
     "node-record-lpcm16": "^0.3.0",
     "snowboy": "^1.2.0",

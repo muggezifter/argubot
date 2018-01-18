@@ -1,85 +1,110 @@
 #! /usr/bin/env node
 
-
-
-console.log("ARGUBOT");
-
 const exec = require('child_process').exec;
-
-var argubot_is_speaking = false;
-
+const blessed = require('blessed');
+const contrib = require('blessed-contrib');
 const record = require('node-record-lpcm16');
 const { Models, Detector } = require("snowboy");
 
 const antonyms = {
-  ja : 'nee',
-  nee: 'ja',
-  goed : 'fout',
-  fout : 'goed',
-  links : 'rechts',
-  rechts : 'links',
-  zwart : 'wit',
-  wit : 'zwart'
+  ja : 'nee'
+  , nee: 'ja'
+  , goed : 'fout'
+  , fout : 'goed'
+  , links : 'rechts'
+  , rechts : 'links'
+  , zwart : 'wit'
+  , wit : 'zwart'
 }
+
+
+const screen = blessed.screen();
+
+const cons = contrib.log({ 
+  border: {
+    type: 'line'
+  }
+  , label: 'CONSOLE'
+  , width: '80%'
+  , height: '15%'
+  , top: '70%'
+  , left: 'center'
+});
+
+const wave = contrib.line({ 
+  style:
+  { line: [255,255,0] 
+   , text: [0,255,0]
+   , baseline: [0,0,0]}
+   , border: {
+    type: 'line'
+  }
+  , top: '10%'
+  , width: '80%'
+  , height: '60%'
+  , left: 'center'
+  , numYLabels: 5
+  , label: 'AUDIO'
+})
+
+screen.append(wave); 
+screen.append(cons);
 
 
 const models = new Models();
 
 for (key in antonyms) {
   models.add({
-    file: '../models/snowboy/'+ key +'.pmdl',
-    sensitivity: '0.5',
-    hotwords : key
+    file: '../models/snowboy/'+ key +'.pmdl'
+    , sensitivity: '0.5'
+    , hotwords : key
   });
 }
 
-
 const detector = new Detector({
-  resource: "./node_modules/snowboy/resources/common.res",
-  models: models,
-  audioGain: 2.0
+  resource: "./node_modules/snowboy/resources/common.res"
+  , models: models
+  , audioGain: 2.0
 });
 
+var argubot_is_speaking = false;
 var cnt_silence = 0;
+var dots='';
 detector.on('silence', function () {
-  if (++cnt_silence > 5) {
-    console.log('ARGUBOT luistert...');
+  if (++cnt_silence > 3 && ! argubot_is_speaking) {
+    cons.log(' ARGUBOT luistert' + dots);
+    dots = (dots.length < 5)? dots+"." : "";
     cnt_silence = 0;
   }
 });
 
 detector.on('sound', function (buffer) {
-  // <buffer> contains the last chunk of the audio that triggers the "sound"
-  // event. It could be written to a wav stream.
-  //console.log('sound');
+  const ratio  = Math.floor(buffer.length/500);
+  const arr = buffer.filter(function (value, index, ar) {
+      return (index % ratio == 0);
+  } );
+
+  wave.setData([ {
+     x: arr.map(function(i,v){ return "t" + i}),
+     y: arr
+  }])
 });
 
 detector.on('error', function () {
-  console.log('error');
+  cons.log(' error');
 });
 
 detector.on('hotword', function (index, hotword, buffer) {
-  // <buffer> contains the last chunk of the audio that triggers the "hotword"
-  // event. It could be written to a wav stream. You will have to use it
-  // together with the <buffer> in the "sound" event if you want to get audio
-  // data after the hotword.
-  
-   console.log(buffer);
-  
   if (! argubot_is_speaking) {
-    console.log('hotword detected', index, hotword);
+    cons.log(' U zegt ' + hotword);
     argubot_is_speaking = true;
     exec('espeak -vnl+m2 ' + antonyms[hotword] , function callback(error, stdout, stderr){
       setTimeout(function(){ 
         argubot_is_speaking = false; 
-        console.log("finished",hotword);
       },250);
     });
-
+    cons.log(" ARGUBOT zegt " +antonyms[hotword]);
   }
- 
-  
-
 });
 
 const mic = record.start({
@@ -88,4 +113,5 @@ const mic = record.start({
 });
 
 mic.pipe(detector);
+screen.render();
 
