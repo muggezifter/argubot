@@ -18,7 +18,9 @@ const antonyms = {
 }
 
 
-const screen = blessed.screen();
+const screen = blessed.screen({
+  smartCSR: true
+});
 
 const cons = contrib.log({ 
   border: {
@@ -47,8 +49,26 @@ const wave = contrib.line({
   , label: 'AUDIO'
 })
 
+const create_bt = function(message) { 
+    return blessed.bigtext({
+    content: ' ' + message + ' ',
+    border: { type: 'line' },
+    padding: { top: 1, bottom: 1, left: 0, right:  2},
+    width: 'shrink',
+    left: "center",
+    top: "center",
+    height: 20,
+    style: {  
+      bg: '#ff0000',
+      fg: '#ffffff', 
+      border: { fg: '#ffffff', bg: '#ff0000'}
+      }
+    });
+  }
+
 screen.append(wave); 
 screen.append(cons);
+
 
 
 const models = new Models();
@@ -98,6 +118,11 @@ detector.on('hotword', function (index, hotword, buffer) {
   if (! argubot_is_speaking) {
     cons.log(' U zegt ' + hotword);
     argubot_is_speaking = true;
+    var bt = create_bt(antonyms[hotword]);
+    screen.append(bt);
+    setTimeout(function(){ 
+        bt.destroy();
+      },100);
     exec('espeak -vnl+m2 ' + antonyms[hotword] , function callback(error, stdout, stderr){
       setTimeout(function(){ 
         argubot_is_speaking = false; 
