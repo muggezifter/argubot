@@ -7,18 +7,28 @@ const record = require('node-record-lpcm16');
 const { Models, Detector } = require('snowboy');
 
 const lexicon = {
-  ja : {antonym: 'nee', sensitity: 0.5},
-  nee: {antonym: 'ja', sensitity: 0.5},
-  goed : {antonym: 'fout', sensitity: 0.5},
-  fout : {antonym: 'goed', sensitity: 0.5},
-  links : {antonym: 'rechts', sensitity: 0.5},
-  rechts : {antonym: 'links', sensitity: 0.5},
-  zwart : {antonym: 'wit', sensitity: 0.5},
-  wit : {antonym: 'zwart', sensitity: 0.5}
+  ja : {antonym: 'nee', sensitity: 0.5, model: 'ja.pmdl'},
+  nee: {antonym: 'ja', sensitity: 0.5, model: 'ja.pmdl'},
+  goed : {antonym: 'fout', sensitity: 0.5, model: 'fout.pmdl'},
+  fout : {antonym: 'goed', sensitity: 0.5, model: 'goed.pmdl'},
+  links : {antonym: 'rechts', sensitity: 0.5, model: 'rechts.pmdl'},
+  rechts : {antonym: 'links', sensitity: 0.5, model: 'links.pmdl'},
+  zwart : {antonym: 'wit', sensitity: 0.5, model: 'wit.pmdl'},
+  wit : {antonym: 'zwart', sensitity: 0.5, model: 'zwart.pmdl'}
 }
 
 const screen = blessed.screen({
-  smartCSR: true
+  smartCSR: true,
+});
+
+const bg = blessed.box({
+  left: 0,
+  top: 0,
+  width: '100%',
+  height: '100%',
+  style: {
+    bg: "#0000ff"
+  }
 });
 
 const cons = contrib.log({
@@ -31,15 +41,18 @@ const cons = contrib.log({
   top: '70%',
   left: 'center',
   style:{
-     fg: [0,250,0],
+     bg: [0,0,255],
+     fg: [255,255,255],
      border : {
-      fg: [0,250,0]
+      bg: [0,0,255],
+      fg: [0,255,0]
      },
      label : {
-      fg: [0,250,0]
+      bg: [0,0,255],
+      fg: [0,255,0]
      }
   }
-});
+})
 
 const wave = contrib.line({
   label: 'AUDIO',
@@ -53,13 +66,16 @@ const wave = contrib.line({
   left: 'center',
   numYLabels: 5,
   style:{
+    bg: [0,0,255],
      line: [255,255,0],
      baseline: [127,127,127],
      border : {
-      fg: [0,250,0]
+      bg: [0,0,255],
+      fg: [0,255,0]
      },
      label : {
-      fg: [0,250,0]
+      bg: [0,0,255],
+      fg: [0,255,0]
      }
   }
 })
@@ -74,6 +90,7 @@ const create_bt = function(message) {
     top: 'center',
     height: 20,
     style: {
+      shadow: true,
       bg: '#ff0000',
       fg: '#ffffff',
       border: { fg: '#ffffff', bg: '#ff0000'}
@@ -81,6 +98,7 @@ const create_bt = function(message) {
   });
 }
 
+screen.append(bg);
 screen.append(wave);
 screen.append(cons);
 
@@ -91,12 +109,11 @@ wave.setData([{
   y: wave_x.map(v=>127+127*Math.sin(v*2*Math.PI/86))
 }])
 
-
 const models = new Models();
 
 for (hotword in lexicon) {
   models.add({
-    file: '../models/snowboy/'+ hotword +'.pmdl',
+    file: '../models/snowboy/'+ lexicon[hotword].model,
     sensitivity: lexicon[hotword].sensitity,
     hotwords : hotword
   });
@@ -122,6 +139,7 @@ detector.on('silence', function () {
 
 detector.on('sound', function (buffer) {
   if (argubot_is_speaking) return;
+  cons.log(' ARGUBOT analyseert buffer...');
   setTimeout(()=>{
     const offset = Math.floor(buffer.length/4);
     const smpls = buffer.filter((v,i)=>i%2==0).slice(offset,offset+86);
