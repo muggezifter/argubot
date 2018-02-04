@@ -106,7 +106,7 @@ const wave_x = [...Array(86).keys()];
 
 wave.setData([{
   x: wave_x,
-  y: wave_x.map(v=>127+127*Math.sin(v*2*Math.PI/86))
+  y: wave_x.map(v=>127+127*Math.sin(v*5*Math.PI/86))
 }])
 
 const models = new Models();
@@ -129,9 +129,9 @@ var argubot_is_speaking = false;
 var cnt_silence = 0;
 var dots='';
 detector.on('silence', function () {
-  if (++cnt_silence > 3 && ! argubot_is_speaking) {
+  if (++cnt_silence > 5 && ! argubot_is_speaking) {
     cons.log(' ARGUBOT luistert' + dots);
-    if (dots.length == 5) cons.log(' [Ctrl-c to exit]');
+    if (dots.length == 5) cons.log(' [Ctrl-c om af te sluiten]');
     dots = (dots.length < 5)? dots+'.' : '';
     cnt_silence = 0;
   }
@@ -154,7 +154,7 @@ detector.on('error',()=>cons.log(' error'));
 
 detector.on('hotword', function (index, hotword, buffer) {
   if (! argubot_is_speaking) {
-    cons.log(' U zegt ' + hotword);
+    cons.log(' >>> U zegt "' + hotword + '"');
     argubot_is_speaking = true;
     const bt = create_bt(lexicon[hotword].antonym);
     screen.append(bt);
@@ -162,7 +162,7 @@ detector.on('hotword', function (index, hotword, buffer) {
     exec('espeak -vnl+m2 ' + lexicon[hotword].antonym , function (error, stdout, stderr){
       setTimeout(()=>argubot_is_speaking=false,500);
     });
-    cons.log(' ARGUBOT zegt ' + lexicon[hotword].antonym);
+    cons.log(' >>> ARGUBOT zegt "' + lexicon[hotword].antonym + '"');
   }
 });
 
