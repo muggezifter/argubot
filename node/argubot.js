@@ -7,14 +7,12 @@ const record = require('node-record-lpcm16');
 const { Models, Detector } = require('snowboy');
 
 const lexicon = {
-  ja : {antonym: 'nee', sensitity: 0.5, model: 'ja.pmdl'},
-  nee: {antonym: 'ja', sensitity: 0.5, model: 'ja.pmdl'},
-  goed : {antonym: 'fout', sensitity: 0.5, model: 'fout.pmdl'},
-  fout : {antonym: 'goed', sensitity: 0.5, model: 'goed.pmdl'},
-  links : {antonym: 'rechts', sensitity: 0.5, model: 'rechts.pmdl'},
-  rechts : {antonym: 'links', sensitity: 0.5, model: 'links.pmdl'},
-  zwart : {antonym: 'wit', sensitity: 0.5, model: 'wit.pmdl'},
-  wit : {antonym: 'zwart', sensitity: 0.5, model: 'zwart.pmdl'}
+  ja : {antonym: 'nee', sensitity: 0.5, model: 'ja20180206.pmdl'},
+  nee: {antonym: 'ja', sensitity: 0.5, model: 'nee20180206.pmdl'},
+  goed : {antonym: 'fout', sensitity: 0.5, model: 'goed20180206.pmdl'},
+  fout : {antonym: 'goed', sensitity: 0.5, model: 'fout20180206.pmdl'},
+  niet : {antonym: 'wel', sensitity: 0.5, model: 'niet20180206.pmdl'},
+  wel : {antonym: 'niet', sensitity: 0.5, model: 'wel20180206.pmdl'},
 }
 
 const screen = blessed.screen({
